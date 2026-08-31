@@ -4,41 +4,49 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap transition-all select-none [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex items-center justify-center gap-1 px-2.5 py-0.5 whitespace-nowrap rounded-full text-xs font-medium ring-offset-background transition-colors select-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
-        default: "bg-emerald-600 text-white border-transparent shadow-xs",
-        secondary: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-        emerald: "bg-emerald-100 text-emerald-800 border-emerald-200 font-medium",
-        slate: "bg-slate-100 text-slate-700 border-slate-200 font-medium",
-        urgent: "bg-rose-50 text-rose-700 border-rose-200/80 font-semibold",
-        warning: "bg-amber-50 text-amber-700 border-amber-200/80 font-semibold",
-        blue: "bg-sky-50 text-sky-700 border-sky-200/80 font-medium",
-        outline: "border-slate-200 text-slate-600 bg-white",
-        ghost: "hover:bg-slate-100 text-slate-600 border-transparent",
+        default:
+          "text-white bg-emerald-500 border border-green-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        secondary:
+          "bg-zinc-100 text-zinc-900 border border-zinc-200/75 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.9)]",
+        success:
+          "text-white bg-emerald-500 border border-green-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        emerald:
+          "text-white bg-emerald-500 border border-green-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        slate:
+          "bg-zinc-100 text-zinc-900 border border-zinc-200/75 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.9)]",
+        urgent:
+          "text-white bg-rose-500 border border-rose-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        warning:
+          "text-white bg-amber-500 border border-amber-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        blue:
+          "text-white bg-sky-500 border border-sky-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        destructive:
+          "text-white bg-rose-500 border border-rose-600 shadow-[inset_0_1px_1px_0_rgb(255_255_255_/_0.4),inset_0_-1px_1px_0_rgba(0,0,0,0.2)]",
+        outline:
+          "text-[#353535] border-[1.5px] border-[#555555] bg-transparent",
+        ghost:
+          "hover:bg-zinc-100 text-zinc-800 border border-transparent",
       },
     },
     defaultVariants: {
-      variant: "secondary",
+      variant: "default",
     },
   }
 )
 
-function Badge({
-  className,
-  variant = "default",
-  ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants>) {
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <span
-      data-slot="badge"
-      data-variant={variant}
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
 
 export { Badge, badgeVariants }
+
