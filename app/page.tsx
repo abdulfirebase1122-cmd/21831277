@@ -237,10 +237,47 @@ const initialPatients: PatientRecord[] = [
     notes: "Potassium mildly low at 3.3 mmol/L. Oral KCl 20mEq administered with orange juice.",
     labOrders: ["Serum Potassium (3.3 - Low)", "Magnesium (2.1 - Normal)", "Troponin (Negative)"],
   },
+  {
+    id: "PT-8839",
+    name: "Arthur Bradley",
+    age: 63,
+    gender: "Male",
+    category: "Discharges",
+    priority: "Discharge Ready",
+    urgency: "emerald",
+    chiefComplaint: "Post-op coronary bypass rehabilitation complete, discharge summary signed.",
+    vitals: { hr: "68 bpm", bp: "120/78", spo2: "99%", temp: "36.6°C", resp: "15/min" },
+    time: "20 min ago",
+    assignedDoc: "Dr. Sarah Mitchell",
+    room: "Room 204",
+    status: "Medications Prescribed & Sent",
+    allergies: ["NKDA"],
+    notes: "Patient fully oriented, surgical incisions clean and dry. Transport confirmed.",
+    labOrders: ["Post-op Clearance Panel", "ECG Normalized"],
+  },
+  {
+    id: "PT-8840",
+    name: "Elena Rostova",
+    age: 48,
+    gender: "Female",
+    category: "Discharges",
+    priority: "Care Plan Final",
+    urgency: "emerald",
+    chiefComplaint: "Pneumonia recovery clearance, outpatient follow-up scheduled.",
+    vitals: { hr: "72 bpm", bp: "118/76", spo2: "98%", temp: "36.7°C", resp: "14/min" },
+    time: "35 min ago",
+    assignedDoc: "Dr. Tariq Al-Mansoor",
+    room: "Room 110",
+    status: "Transport Arranged",
+    allergies: ["Sulfa drugs"],
+    notes: "Follow-up outpatient telehealth consultation scheduled for next Wednesday.",
+    labOrders: ["Repeat Chest X-Ray (Clear)", "WBC Count Normal"],
+  },
 ]
 
 export default function HealthcareDashboard() {
   const [patients, setPatients] = React.useState<PatientRecord[]>(initialPatients)
+  const [activeCategory, setActiveCategory] = React.useState<string>("Triage Queue")
   const [selectedPatientId, setSelectedPatientId] = React.useState<string>("PT-8831")
   const [filterPriority, setFilterPriority] = React.useState<string>("all")
   const [searchQuery, setSearchQuery] = React.useState<string>("")
@@ -262,8 +299,29 @@ export default function HealthcareDashboard() {
     return patients.find((p) => p.id === selectedPatientId) || patients[0]
   }, [patients, selectedPatientId])
 
+  const handleSelectPatient = (id: string) => {
+    setSelectedPatientId(id)
+    const pt = patients.find((p) => p.id === id)
+    if (pt && pt.category) {
+      setActiveCategory(pt.category)
+    }
+  }
+
+  const handleSelectCategory = (category: string) => {
+    setActiveCategory(category)
+    if (category !== "All Streams") {
+      const match = patients.find((p) => p.category === category)
+      if (match && selectedPatient.category !== category) {
+        setSelectedPatientId(match.id)
+      }
+    }
+  }
+
   const filteredPatients = React.useMemo(() => {
     return patients.filter((patient) => {
+      if (activeCategory && activeCategory !== "All Streams" && patient.category !== activeCategory) {
+        return false
+      }
       if (filterPriority === "urgent" && patient.urgency !== "urgent") return false
       if (filterPriority === "warning" && patient.urgency !== "warning") return false
       if (filterPriority === "routine" && patient.urgency !== "secondary" && patient.urgency !== "slate" && patient.urgency !== "blue") return false
@@ -279,7 +337,7 @@ export default function HealthcareDashboard() {
       }
       return true
     })
-  }, [patients, filterPriority, searchQuery])
+  }, [patients, activeCategory, filterPriority, searchQuery])
 
   // Count active urgent
   const urgentCount = patients.filter((p) => p.urgency === "urgent").length
@@ -360,7 +418,9 @@ export default function HealthcareDashboard() {
     >
       <AppSidebar
         selectedPatientId={selectedPatientId}
-        onSelectPatient={(id) => setSelectedPatientId(id)}
+        onSelectPatient={handleSelectPatient}
+        activeCategory={activeCategory}
+        onSelectCategory={handleSelectCategory}
       />
 
       <SidebarInset className="bg-slate-50/50 min-h-screen flex flex-col">
@@ -373,22 +433,46 @@ export default function HealthcareDashboard() {
             <Separator orientation="vertical" className="h-5 bg-slate-200" />
             
             <div className="flex items-center gap-2">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-xs">
+              <button
+                type="button"
+                onClick={() => handleSelectCategory("All Streams")}
+                className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+                title="Reset to All Streams"
+              >
                 <Stethoscope className="size-4" />
-              </div>
+              </button>
               <Breadcrumb className="hidden sm:block">
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="#" className="text-slate-500 hover:text-slate-900 text-xs font-medium">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectCategory("All Streams")}
+                      className="text-slate-500 hover:text-emerald-700 text-xs font-medium transition-colors cursor-pointer"
+                    >
                       HealthPulse Clinical System
-                    </BreadcrumbLink>
+                    </button>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="text-slate-300" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage className="text-slate-900 font-semibold text-xs">
-                      Emergency & Triage Operations
-                    </BreadcrumbPage>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectCategory(activeCategory)}
+                      className="text-slate-700 hover:text-emerald-700 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      {activeCategory}
+                    </button>
                   </BreadcrumbItem>
+                  {selectedPatient && (
+                    <>
+                      <BreadcrumbSeparator className="text-slate-300" />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage className="text-emerald-700 font-bold text-xs flex items-center gap-1.5">
+                          <span>{selectedPatient.name}</span>
+                          <span className="text-[10px] text-slate-400 font-normal">({selectedPatient.id})</span>
+                        </BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </>
+                  )}
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
@@ -488,7 +572,7 @@ export default function HealthcareDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setFilterPriority(filterPriority === "urgent" ? "all" : "urgent")}
-                  className={`text-xs border-slate-200 ${
+                  className={`text-xs border-slate-200 cursor-pointer ${
                     filterPriority === "urgent"
                       ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
                       : "bg-white text-slate-700 hover:bg-slate-50"
@@ -501,9 +585,9 @@ export default function HealthcareDashboard() {
                   variant="secondary"
                   size="sm"
                   onClick={() => {
-                    setSelectedPatientId("PT-8838")
+                    handleSelectPatient("PT-8838")
                   }}
-                  className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200 text-xs font-semibold"
+                  className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border-emerald-200 text-xs font-semibold cursor-pointer"
                 >
                   <FlaskConical className="size-3.5 mr-1.5 text-emerald-700" />
                   Review Stat Labs (3)
@@ -518,7 +602,10 @@ export default function HealthcareDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Card 1: Total Patients */}
-            <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              onClick={() => handleSelectCategory("All Streams")}
+              className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer"
+            >
               <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Total Patients Today
@@ -529,20 +616,23 @@ export default function HealthcareDashboard() {
               </CardHeader>
               <CardContent className="p-4 pt-1 space-y-2">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold text-slate-900 tracking-tight">48</span>
+                  <span className="text-2xl font-bold text-slate-900 tracking-tight">{patients.length}</span>
                   <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-50 px-1.5 py-0.5 text-xs font-semibold text-emerald-700">
                     <ArrowUpRight className="size-3" />
                     +12.4%
                   </span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  38 Outpatient • 10 Inpatient Admissions
+                  Click to view all streams ({patients.length} cases)
                 </p>
               </CardContent>
             </Card>
 
             {/* Card 2: Average Triage Wait */}
-            <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              onClick={() => handleSelectCategory("Triage Queue")}
+              className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer"
+            >
               <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Avg Triage Wait Time
@@ -560,13 +650,16 @@ export default function HealthcareDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Target: &lt; 20 mins (94% adherence)
+                  Target: &lt; 20 mins (Click to inspect Triage)
                 </p>
               </CardContent>
             </Card>
 
             {/* Card 3: Bed Occupancy */}
-            <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              onClick={() => handleSelectCategory("Inpatient Ward")}
+              className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer"
+            >
               <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Bed Occupancy Rate
@@ -579,7 +672,7 @@ export default function HealthcareDashboard() {
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-bold text-slate-900 tracking-tight">82.3%</span>
                   <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-700">
-                    28 / 34 Active
+                    Ward 4B Active
                   </span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -589,7 +682,10 @@ export default function HealthcareDashboard() {
             </Card>
 
             {/* Card 4: Stat Lab Turnaround */}
-            <Card className="border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              onClick={() => handleSelectCategory("Lab Results")}
+              className="border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer"
+            >
               <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Stat Lab Turnaround
@@ -606,7 +702,7 @@ export default function HealthcareDashboard() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Troponin, CT Scan & Electrolyte labs ready
+                  Click to inspect Lab Results stream
                 </p>
               </CardContent>
             </Card>
@@ -621,37 +717,76 @@ export default function HealthcareDashboard() {
             {/* LEFT 7 COLS: PATIENT QUEUE TABLE & FILTER CONTROLS */}
             <div className="lg:col-span-7 space-y-4">
               <Card className="border border-slate-200 bg-white shadow-sm">
-                <CardHeader className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-base font-bold text-slate-900">
-                      Live Triage & Patient Roster
-                    </CardTitle>
-                    <CardDescription className="text-xs text-slate-500 mt-0.5">
-                      Select a patient to inspect clinical vitals, order stat labs, or manage status.
-                    </CardDescription>
+                <CardHeader className="p-4 border-b border-slate-100 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-base font-bold text-slate-900">
+                          {activeCategory === "All Streams" ? "All Patient Streams" : activeCategory}
+                        </CardTitle>
+                        <Badge variant="secondary" className="text-[11px] bg-slate-100 text-slate-700">
+                          {filteredPatients.length} Records
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-xs text-slate-500 mt-0.5">
+                        Select any patient record to map clinical vitals, lab orders, and active care status.
+                      </CardDescription>
+                    </div>
+
+                    {/* Priority Filter Tabs */}
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg shrink-0">
+                      {[
+                        { key: "all", label: "All" },
+                        { key: "urgent", label: "Urgent" },
+                        { key: "warning", label: "Moderate" },
+                        { key: "routine", label: "Routine" },
+                      ].map((tab) => (
+                        <button
+                          type="button"
+                          key={tab.key}
+                          onClick={() => setFilterPriority(tab.key)}
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                            filterPriority === tab.key
+                              ? "bg-white text-slate-900 shadow-xs"
+                              : "text-slate-600 hover:text-slate-900"
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Priority Filter Tabs */}
-                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                  {/* Category Stream Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
                     {[
-                      { key: "all", label: "All Cases" },
-                      { key: "urgent", label: "Urgent" },
-                      { key: "warning", label: "Moderate" },
-                      { key: "routine", label: "Routine" },
-                    ].map((tab) => (
-                      <button
-                        type="button"
-                        key={tab.key}
-                        onClick={() => setFilterPriority(tab.key)}
-                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                          filterPriority === tab.key
-                            ? "bg-white text-slate-900 shadow-xs"
-                            : "text-slate-600 hover:text-slate-900"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
+                      "All Streams",
+                      "Triage Queue",
+                      "Consultations",
+                      "Inpatient Ward",
+                      "Lab Results",
+                      "Discharges",
+                    ].map((cat) => {
+                      const isCatActive = activeCategory === cat
+                      const count = cat === "All Streams" ? patients.length : patients.filter((p) => p.category === cat).length
+                      return (
+                        <button
+                          type="button"
+                          key={cat}
+                          onClick={() => handleSelectCategory(cat)}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                            isCatActive
+                              ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          }`}
+                        >
+                          <span>{cat}</span>
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isCatActive ? "bg-emerald-800 text-white" : "bg-white text-slate-600"}`}>
+                            {count}
+                          </span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </CardHeader>
 
@@ -671,7 +806,7 @@ export default function HealthcareDashboard() {
                       {filteredPatients.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="py-8 text-center text-slate-500">
-                            No patients found matching the selected filter criteria.
+                            No patients found matching the selected stream and filter criteria.
                           </td>
                         </tr>
                       ) : (
@@ -680,17 +815,17 @@ export default function HealthcareDashboard() {
                           return (
                             <tr
                               key={patient.id}
-                              onClick={() => setSelectedPatientId(patient.id)}
+                              onClick={() => handleSelectPatient(patient.id)}
                               className={`cursor-pointer transition-colors ${
                                 isSelected
-                                  ? "bg-emerald-50/60 font-medium"
+                                  ? "bg-emerald-50/70 font-medium"
                                   : "hover:bg-slate-50"
                               }`}
                             >
                               <td className="py-3 px-4">
                                 <div className="font-bold text-slate-900">{patient.name}</div>
                                 <div className="text-[11px] text-slate-500">
-                                  {patient.id} • {patient.age}y {patient.gender.charAt(0)}
+                                  {patient.id} • {patient.age}y {patient.gender.charAt(0)} • <span className="text-emerald-700 font-medium">{patient.category}</span>
                                 </div>
                               </td>
 
@@ -722,15 +857,15 @@ export default function HealthcareDashboard() {
 
                               <td className="py-3 px-4 text-right">
                                 <Button
-                                  variant="ghost"
+                                  variant={isSelected ? "default" : "ghost"}
                                   size="xs"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    setSelectedPatientId(patient.id)
+                                    handleSelectPatient(patient.id)
                                   }}
-                                  className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-7 px-2"
+                                  className={`h-7 px-2.5 ${isSelected ? "bg-emerald-600 text-white" : "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"}`}
                                 >
-                                  View
+                                  {isSelected ? "Active" : "Inspect"}
                                 </Button>
                               </td>
                             </tr>
@@ -742,7 +877,7 @@ export default function HealthcareDashboard() {
                 </CardContent>
 
                 <CardFooter className="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <span>Showing {filteredPatients.length} active triage records</span>
+                  <span>Showing {filteredPatients.length} active records in {activeCategory}</span>
                   <div className="flex items-center gap-2">
                     <span className="size-2 rounded-full bg-emerald-500" />
                     <span>Real-time Clinical Socket Active</span>
@@ -936,27 +1071,38 @@ export default function HealthcareDashboard() {
               </CardHeader>
               <CardContent className="p-4 space-y-3">
                 {[
-                  { time: "10:30 AM", name: "David Kim", type: "Telehealth Video", status: "Ready", icon: Video },
-                  { time: "11:15 AM", name: "Maria Santos", type: "Clinical Suite 4", status: "Checked In", icon: Stethoscope },
-                  { time: "01:00 PM", name: "Arthur Bradley", type: "Post-Op Wound Review", status: "Upcoming", icon: Stethoscope },
-                  { time: "02:30 PM", name: "Elena Rostova", type: "Cardiology Follow-up", status: "Upcoming", icon: Video },
-                ].map((apt, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex size-7 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
-                        <apt.icon className="size-3.5" />
+                  { id: "PT-8835", time: "10:30 AM", name: "David Kim", type: "Telehealth Video", status: "Ready", icon: Video },
+                  { id: "PT-8836", time: "11:15 AM", name: "Maria Santos", type: "Clinical Suite 4", status: "Checked In", icon: Stethoscope },
+                  { id: "PT-8839", time: "01:00 PM", name: "Arthur Bradley", type: "Post-Op Wound Review", status: "Upcoming", icon: Stethoscope },
+                  { id: "PT-8840", time: "02:30 PM", name: "Elena Rostova", type: "Cardiology Follow-up", status: "Upcoming", icon: Video },
+                ].map((apt) => {
+                  const isAptSelected = selectedPatient.id === apt.id
+                  return (
+                    <div
+                      key={apt.id}
+                      onClick={() => handleSelectPatient(apt.id)}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all ${
+                        isAptSelected
+                          ? "bg-emerald-50/80 border-emerald-400 ring-1 ring-emerald-400/50"
+                          : "bg-slate-50 border-slate-200 hover:bg-emerald-50/40 hover:border-emerald-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex size-7 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+                          <apt.icon className="size-3.5" />
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900">{apt.name}</div>
+                          <div className="text-[11px] text-slate-500">{apt.type} • {apt.id}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold text-slate-900">{apt.name}</div>
-                        <div className="text-[11px] text-slate-500">{apt.type}</div>
+                      <div className="text-right">
+                        <span className="font-semibold text-slate-800 block">{apt.time}</span>
+                        <span className="inline-block text-[10px] text-emerald-700 font-medium">{apt.status}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-semibold text-slate-800 block">{apt.time}</span>
-                      <span className="inline-block text-[10px] text-emerald-700 font-medium">{apt.status}</span>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </CardContent>
             </Card>
 
@@ -976,21 +1122,32 @@ export default function HealthcareDashboard() {
               </CardHeader>
               <CardContent className="p-4 space-y-3">
                 {[
-                  { title: "Troponin I Serial Panel", patient: "Eleanor Vance (Bay 2)", status: "Completed (0.04 ng/mL)", time: "6m ago", normal: true },
-                  { title: "Head Non-Contrast CT", patient: "Marcus Vance (Bay A)", status: "Ready for Radiology Review", time: "12m ago", normal: false },
-                  { title: "Serum Electrolytes (K+)", patient: "Hannah Lindqvist (Obs 3)", status: "Low: 3.3 mmol/L", time: "18m ago", normal: false },
-                ].map((lab, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-900">{lab.title}</span>
-                      <span className="text-[10px] text-slate-500">{lab.time}</span>
+                  { id: "PT-8831", title: "Troponin I Serial Panel", patient: "Eleanor Vance (Bay 2)", status: "Completed (0.04 ng/mL)", time: "6m ago", normal: true },
+                  { id: "PT-8832", title: "Head Non-Contrast CT", patient: "Marcus Vance (Bay A)", status: "Ready for Radiology Review", time: "12m ago", normal: false },
+                  { id: "PT-8838", title: "Serum Electrolytes (K+)", patient: "Hannah Lindqvist (Obs 3)", status: "Low: 3.3 mmol/L", time: "18m ago", normal: false },
+                ].map((lab) => {
+                  const isLabSelected = selectedPatient.id === lab.id
+                  return (
+                    <div
+                      key={lab.id}
+                      onClick={() => handleSelectPatient(lab.id)}
+                      className={`p-2.5 rounded-lg border text-xs space-y-1 cursor-pointer transition-all ${
+                        isLabSelected
+                          ? "bg-emerald-50/80 border-emerald-400 ring-1 ring-emerald-400/50"
+                          : "bg-slate-50 border-slate-200 hover:bg-emerald-50/40 hover:border-emerald-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{lab.title}</span>
+                        <span className="text-[10px] text-slate-500">{lab.time}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600">{lab.patient} • {lab.id}</div>
+                      <div className={`text-[11px] font-semibold ${lab.normal ? "text-emerald-700" : "text-amber-700"}`}>
+                        {lab.status}
+                      </div>
                     </div>
-                    <div className="text-[11px] text-slate-600">{lab.patient}</div>
-                    <div className={`text-[11px] font-semibold ${lab.normal ? "text-emerald-700" : "text-amber-700"}`}>
-                      {lab.status}
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </CardContent>
             </Card>
 

@@ -208,26 +208,61 @@ const clinicalData = {
       status: "Results Ready",
       isUnread: true,
     },
+    {
+      id: "PT-8839",
+      name: "Arthur Bradley",
+      age: 63,
+      gender: "Male",
+      category: "Discharges",
+      priority: "Discharge Ready",
+      urgency: "emerald" as const,
+      chiefComplaint: "Post-op coronary bypass rehabilitation complete, discharge summary signed",
+      vitals: { hr: "68 bpm", bp: "120/78", spo2: "99%" },
+      time: "20 min ago",
+      assignedDoc: "Dr. Mitchell",
+      room: "Room 204",
+      status: "Medications Prescribed & Sent",
+      isUnread: false,
+    },
+    {
+      id: "PT-8840",
+      name: "Elena Rostova",
+      age: 48,
+      gender: "Female",
+      category: "Discharges",
+      priority: "Care Plan Final",
+      urgency: "emerald" as const,
+      chiefComplaint: "Pneumonia recovery clearance, outpatient follow-up scheduled",
+      vitals: { hr: "72 bpm", bp: "118/76", spo2: "98%" },
+      time: "35 min ago",
+      assignedDoc: "Dr. Al-Mansoor",
+      room: "Room 110",
+      status: "Transport Arranged",
+      isUnread: false,
+    },
   ],
 }
 
 export function AppSidebar({
   selectedPatientId,
   onSelectPatient,
+  activeCategory = "Triage Queue",
+  onSelectCategory,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   selectedPatientId?: string
   onSelectPatient?: (id: string) => void
+  activeCategory?: string
+  onSelectCategory?: (category: string) => void
 }) {
-  const [activeCategory, setActiveCategory] = React.useState(clinicalData.navMain[0].title)
   const [searchTerm, setSearchTerm] = React.useState("")
   const [showUnreadsOnly, setShowUnreadsOnly] = React.useState(false)
   const { setOpen } = useSidebar()
 
   const filteredPatients = React.useMemo(() => {
     return clinicalData.patients.filter((patient) => {
-      if (activeCategory !== "All Streams" && patient.category !== activeCategory) {
-        // Fallback for demonstration if category has few items
+      if (activeCategory && activeCategory !== "All Streams" && patient.category !== activeCategory) {
+        return false
       }
       if (showUnreadsOnly && !patient.isUnread) return false
       if (searchTerm) {
@@ -280,7 +315,7 @@ export function AppSidebar({
                           hidden: false,
                         }}
                         onClick={() => {
-                          setActiveCategory(item.title)
+                          onSelectCategory?.(item.title)
                           setOpen(true)
                         }}
                         isActive={isActive}
