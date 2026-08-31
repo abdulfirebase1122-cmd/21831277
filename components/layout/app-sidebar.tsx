@@ -341,7 +341,10 @@ export function AppSidebar({
       </Sidebar>
 
       {/* Secondary Triage Stream Pane */}
-      <Sidebar collapsible="none" className="hidden flex-1 md:flex overflow-hidden bg-slate-50/50">
+      <Sidebar
+        collapsible="none"
+        className="hidden flex-1 md:flex overflow-hidden bg-slate-50/50 transition-[width,opacity] duration-200 group-data-[collapsible=icon]:group-data-[state=collapsed]:hidden"
+      >
         <SidebarHeader className="gap-3 border-b border-slate-200 bg-white p-4">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-2">

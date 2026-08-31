@@ -429,7 +429,10 @@ export default function HealthcareDashboard() {
         {/* ======================================================== */}
         <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6 shadow-xs">
           <div className="flex items-center gap-3">
-            <SidebarTrigger className="-ml-1 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg p-1.5 transition-colors" />
+            <SidebarTrigger
+              title="Toggle Sidebar Navigation"
+              className="-ml-1 text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg p-1.5 transition-colors cursor-pointer"
+            />
             <Separator orientation="vertical" className="h-5 bg-slate-200" />
             
             <div className="flex items-center gap-2">
