@@ -1,6 +1,6 @@
 {
-  "name": "Ping Queue Dashboard",
-  "description": "A clean, modern productivity dashboard with sidebar and header navigation",
+  "name": "HealthPulse Clinical Dashboard",
+  "description": "A modern healthcare and patient triage dashboard with emerald clinical accents and slate hierarchy",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

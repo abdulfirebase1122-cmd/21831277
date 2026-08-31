@@ -13,11 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ping Queue Dashboard",
-  description: "A clean, modern productivity dashboard with sidebar and header navigation",
+  title: "HealthPulse Clinical Dashboard",
+  description: "A modern healthcare and patient triage dashboard with emerald clinical accents and slate hierarchy",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"

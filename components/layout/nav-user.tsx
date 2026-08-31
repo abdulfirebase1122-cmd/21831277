@@ -1,12 +1,15 @@
 "use client"
 
 import {
+  Activity,
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
+  FileSpreadsheet,
   LogOut,
-  Sparkles,
+  Settings,
+  ShieldCheck,
+  User,
 } from "lucide-react"
 
 import {
@@ -37,6 +40,7 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    role?: string
   }
 }) {
   const { isMobile } = useSidebar()
@@ -48,63 +52,54 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground md:h-8 md:p-0"
+              className="data-[state=open]:bg-emerald-50 data-[state=open]:text-emerald-700 hover:bg-slate-100 p-2 rounded-lg"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+              <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs">
+                SM
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold text-slate-900">{user.name}</span>
+                <span className="truncate text-xs text-slate-500">{user.role || user.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-md"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+            <DropdownMenuLabel className="p-1.5 font-normal">
+              <div className="flex items-center gap-2 text-left">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs">
+                  SM
+                </div>
+                <div className="grid flex-1 text-left text-xs leading-tight">
+                  <span className="truncate font-semibold text-slate-900">{user.name}</span>
+                  <span className="truncate text-slate-500">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-slate-100" />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem className="text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-md cursor-pointer">
+                <User className="size-4 text-emerald-600 mr-2" />
+                Clinician Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-md cursor-pointer">
+                <Activity className="size-4 text-emerald-600 mr-2" />
+                Ward Triage Shift
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 rounded-md cursor-pointer">
+                <ShieldCheck className="size-4 text-emerald-600 mr-2" />
+                HIPAA & EHR Access
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuSeparator className="bg-slate-100" />
+            <DropdownMenuItem className="text-rose-600 hover:bg-rose-50 rounded-md cursor-pointer">
+              <LogOut className="size-4 text-rose-500 mr-2" />
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -112,3 +107,4 @@ export function NavUser({
     </SidebarMenu>
   )
 }
+

@@ -1,9 +1,24 @@
 "use client"
 
 import * as React from "react"
-import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
+import {
+  Activity,
+  AlertCircle,
+  Calendar,
+  ClipboardList,
+  Clock,
+  FileText,
+  FlaskConical,
+  HeartPulse,
+  Plus,
+  Search,
+  Stethoscope,
+  Users,
+} from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import {
   Sidebar,
@@ -20,239 +35,357 @@ import {
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
 
-// This is sample data
-const data = {
+const clinicalData = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Dr. Sarah Mitchell",
+    email: "s.mitchell@healthpulse.org",
+    avatar: "",
+    role: "Chief Triage Physician",
   },
   navMain: [
     {
-      title: "Inbox",
-      url: "#",
-      icon: Inbox,
-      isActive: true,
+      title: "Triage Queue",
+      icon: Activity,
+      count: 6,
+      badge: "6 Active",
+      badgeVariant: "urgent" as const,
     },
     {
-      title: "Drafts",
-      url: "#",
-      icon: File,
-      isActive: false,
+      title: "Consultations",
+      icon: Stethoscope,
+      count: 4,
+      badge: "4 Scheduled",
+      badgeVariant: "secondary" as const,
     },
     {
-      title: "Sent",
-      url: "#",
-      icon: Send,
-      isActive: false,
+      title: "Inpatient Ward",
+      icon: Users,
+      count: 12,
+      badge: "12 Beds",
+      badgeVariant: "slate" as const,
     },
     {
-      title: "Junk",
-      url: "#",
-      icon: ArchiveX,
-      isActive: false,
+      title: "Lab Results",
+      icon: FlaskConical,
+      count: 3,
+      badge: "3 Pending",
+      badgeVariant: "warning" as const,
     },
     {
-      title: "Trash",
-      url: "#",
-      icon: Trash2,
-      isActive: false,
+      title: "Discharges",
+      icon: ClipboardList,
+      count: 2,
+      badge: "2 Ready",
+      badgeVariant: "emerald" as const,
     },
   ],
-  mails: [
+  patients: [
     {
-      name: "William Smith",
-      email: "williamsmith@example.com",
-      subject: "Meeting Tomorrow",
-      date: "09:34 AM",
-      teaser:
-        "Hi team, just a reminder about our meeting tomorrow at 10 AM.\nPlease come prepared with your project updates.",
+      id: "PT-8831",
+      name: "Eleanor Vance",
+      age: 42,
+      gender: "Female",
+      category: "Triage Queue",
+      priority: "High Priority",
+      urgency: "urgent" as const,
+      chiefComplaint: "Acute chest tightness & shortness of breath upon exertion",
+      vitals: { hr: "104 bpm", bp: "148/92", spo2: "94%" },
+      time: "8 min ago",
+      assignedDoc: "Dr. Mitchell",
+      room: "Room 102",
+      status: "Awaiting ECG",
+      isUnread: true,
     },
     {
-      name: "Alice Smith",
-      email: "alicesmith@example.com",
-      subject: "Re: Project Update",
-      date: "Yesterday",
-      teaser:
-        "Thanks for the update. The progress looks great so far.\nLet's schedule a call to discuss the next steps.",
+      id: "PT-8832",
+      name: "Marcus Aurelius Vance",
+      age: 67,
+      gender: "Male",
+      category: "Triage Queue",
+      priority: "Critical",
+      urgency: "urgent" as const,
+      chiefComplaint: "Suspected TIA with mild left-side facial numbness",
+      vitals: { hr: "88 bpm", bp: "162/98", spo2: "97%" },
+      time: "14 min ago",
+      assignedDoc: "Dr. Mitchell",
+      room: "Trauma Bay A",
+      status: "CT Scan Ordered",
+      isUnread: true,
     },
     {
-      name: "Bob Johnson",
-      email: "bobjohnson@example.com",
-      subject: "Weekend Plans",
-      date: "2 days ago",
-      teaser:
-        "Hey everyone! I'm thinking of organizing a team outing this weekend.\nWould you be interested in a hiking trip or a beach day?",
+      id: "PT-8833",
+      name: "Sophia Chen",
+      age: 29,
+      gender: "Female",
+      category: "Triage Queue",
+      priority: "Moderate",
+      urgency: "warning" as const,
+      chiefComplaint: "Right lower quadrant abdominal pain, febrile (38.6°C)",
+      vitals: { hr: "96 bpm", bp: "118/76", spo2: "99%" },
+      time: "25 min ago",
+      assignedDoc: "Dr. Al-Mansoor",
+      room: "Room 105",
+      status: "Ultrasound Pending",
+      isUnread: true,
     },
     {
-      name: "Emily Davis",
-      email: "emilydavis@example.com",
-      subject: "Re: Question about Budget",
-      date: "2 days ago",
-      teaser:
-        "I've reviewed the budget numbers you sent over.\nCan we set up a quick call to discuss some potential adjustments?",
+      id: "PT-8834",
+      name: "James Thornton",
+      age: 55,
+      gender: "Male",
+      category: "Triage Queue",
+      priority: "Routine",
+      urgency: "secondary" as const,
+      chiefComplaint: "Post-op wound dressing evaluation, localized erythema",
+      vitals: { hr: "72 bpm", bp: "124/82", spo2: "98%" },
+      time: "42 min ago",
+      assignedDoc: "Nurse Diaz",
+      room: "Minor Care 3",
+      status: "Checked In",
+      isUnread: false,
     },
     {
-      name: "Michael Wilson",
-      email: "michaelwilson@example.com",
-      subject: "Important Announcement",
-      date: "1 week ago",
-      teaser:
-        "Please join us for an all-hands meeting this Friday at 3 PM.\nWe have some exciting news to share about the company's future.",
+      id: "PT-8835",
+      name: "David Kim",
+      age: 34,
+      gender: "Male",
+      category: "Consultations",
+      priority: "Telehealth",
+      urgency: "blue" as const,
+      chiefComplaint: "Hypertension medication titration follow-up & lab review",
+      vitals: { hr: "68 bpm", bp: "130/84", spo2: "99%" },
+      time: "10:30 AM",
+      assignedDoc: "Dr. Mitchell",
+      room: "Virtual 02",
+      status: "Call Ready",
+      isUnread: true,
     },
     {
-      name: "Sarah Brown",
-      email: "sarahbrown@example.com",
-      subject: "Re: Feedback on Proposal",
-      date: "1 week ago",
-      teaser:
-        "Thank you for sending over the proposal. I've reviewed it and have some thoughts.\nCould we schedule a meeting to discuss my feedback in detail?",
+      id: "PT-8836",
+      name: "Maria Santos",
+      age: 51,
+      gender: "Female",
+      category: "Consultations",
+      priority: "Follow-up",
+      urgency: "secondary" as const,
+      chiefComplaint: "Type 2 Diabetes quarterly HbA1c review (6.4%)",
+      vitals: { hr: "74 bpm", bp: "122/78", spo2: "98%" },
+      time: "11:15 AM",
+      assignedDoc: "Dr. Mitchell",
+      room: "Suite 4",
+      status: "Checked In",
+      isUnread: false,
     },
     {
-      name: "David Lee",
-      email: "davidlee@example.com",
-      subject: "New Project Idea",
-      date: "1 week ago",
-      teaser:
-        "I've been brainstorming and came up with an interesting project concept.\nDo you have time this week to discuss its potential impact and feasibility?",
+      id: "PT-8837",
+      name: "Robert Patterson",
+      age: 73,
+      gender: "Male",
+      category: "Inpatient Ward",
+      priority: "Post-Op Day 2",
+      urgency: "slate" as const,
+      chiefComplaint: "Total knee arthroplasty recovery, physical therapy rehab",
+      vitals: { hr: "76 bpm", bp: "128/80", spo2: "97%" },
+      time: "Ward 4B",
+      assignedDoc: "Dr. Reynolds",
+      room: "Bed 412",
+      status: "Mobilizing",
+      isUnread: false,
     },
     {
-      name: "Olivia Wilson",
-      email: "oliviawilson@example.com",
-      subject: "Vacation Plans",
-      date: "1 week ago",
-      teaser:
-        "Just a heads up that I'll be taking a two-week vacation next month.\nI'll make sure all my projects are up to date before I leave.",
-    },
-    {
-      name: "James Martin",
-      email: "jamesmartin@example.com",
-      subject: "Re: Conference Registration",
-      date: "1 week ago",
-      teaser:
-        "I've completed the registration for the upcoming tech conference.\nLet me know if you need any additional information from my end.",
-    },
-    {
-      name: "Sophia White",
-      email: "sophiawhite@example.com",
-      subject: "Team Dinner",
-      date: "1 week ago",
-      teaser:
-        "To celebrate our recent project success, I'd like to organize a team dinner.\nAre you available next Friday evening? Please let me know your preferences.",
+      id: "PT-8838",
+      name: "Hannah Lindqvist",
+      age: 26,
+      gender: "Female",
+      category: "Lab Results",
+      priority: "Stat Lab",
+      urgency: "warning" as const,
+      chiefComplaint: "Electrolyte panel & Troponin I serial follow-up",
+      vitals: { hr: "80 bpm", bp: "116/74", spo2: "100%" },
+      time: "15 min ago",
+      assignedDoc: "Dr. Mitchell",
+      room: "Lab 2",
+      status: "Results Ready",
+      isUnread: true,
     },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // Note: I'm using state to show active item.
-  // IRL you should use the url/router.
-  const [activeItem, setActiveItem] = React.useState(data.navMain[0])
-  const [mails, setMails] = React.useState(data.mails)
+export function AppSidebar({
+  selectedPatientId,
+  onSelectPatient,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  selectedPatientId?: string
+  onSelectPatient?: (id: string) => void
+}) {
+  const [activeCategory, setActiveCategory] = React.useState(clinicalData.navMain[0].title)
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const [showUnreadsOnly, setShowUnreadsOnly] = React.useState(false)
   const { setOpen } = useSidebar()
+
+  const filteredPatients = React.useMemo(() => {
+    return clinicalData.patients.filter((patient) => {
+      if (activeCategory !== "All Streams" && patient.category !== activeCategory) {
+        // Fallback for demonstration if category has few items
+      }
+      if (showUnreadsOnly && !patient.isUnread) return false
+      if (searchTerm) {
+        const query = searchTerm.toLowerCase()
+        return (
+          patient.name.toLowerCase().includes(query) ||
+          patient.id.toLowerCase().includes(query) ||
+          patient.chiefComplaint.toLowerCase().includes(query) ||
+          patient.status.toLowerCase().includes(query)
+        )
+      }
+      return true
+    })
+  }, [activeCategory, showUnreadsOnly, searchTerm])
 
   return (
     <Sidebar
       collapsible="icon"
-      className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
+      className="overflow-hidden border-r border-slate-200 *:data-[sidebar=sidebar]:flex-row bg-white"
       {...props}
     >
-      {/* This is the first sidebar */}
-      {/* We disable collapsible and adjust width to icon. */}
-      {/* This will make the sidebar appear as icons. */}
+      {/* Icon Rail */}
       <Sidebar
         collapsible="none"
-        className="w-[calc(var(--sidebar-width-icon)+1px)]! border-r"
+        className="w-[calc(var(--sidebar-width-icon)+1px)] min-w-[calc(var(--sidebar-width-icon)+1px)] shrink-0 border-r border-slate-200 bg-white"
       >
-        <SidebarHeader>
+        <SidebarHeader className="p-2 border-b border-slate-100 flex items-center justify-center">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <Command className="size-4" />
-                  </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Acme Inc</span>
-                    <span className="truncate text-xs">Enterprise</span>
-                  </div>
+              <SidebarMenuButton size="lg" asChild className="md:h-10 md:w-10 p-0 justify-center">
+                <a href="#" className="flex items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition-colors">
+                  <HeartPulse className="size-5" />
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-        <SidebarContent>
+
+        <SidebarContent className="py-3">
           <SidebarGroup>
             <SidebarGroupContent className="px-1.5 md:px-0">
-              <SidebarMenu>
-                {data.navMain.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      tooltip={{
-                        children: item.title,
-                        hidden: false,
-                      }}
-                      onClick={() => {
-                        setActiveItem(item)
-                        const mail = data.mails.sort(() => Math.random() - 0.5)
-                        setMails(
-                          mail.slice(
-                            0,
-                            Math.max(5, Math.floor(Math.random() * 10) + 1)
-                          )
-                        )
-                        setOpen(true)
-                      }}
-                      isActive={activeItem?.title === item.title}
-                      className="px-2.5 md:px-2"
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+              <SidebarMenu className="gap-1.5">
+                {clinicalData.navMain.map((item) => {
+                  const isActive = activeCategory === item.title
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        tooltip={{
+                          children: `${item.title} (${item.badge})`,
+                          hidden: false,
+                        }}
+                        onClick={() => {
+                          setActiveCategory(item.title)
+                          setOpen(true)
+                        }}
+                        isActive={isActive}
+                        className={`size-10 rounded-xl justify-center transition-all ${
+                          isActive
+                            ? "bg-emerald-50 text-emerald-700 font-semibold shadow-xs"
+                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        }`}
+                      >
+                        <item.icon className="size-5" />
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <NavUser user={data.user} />
+
+        <SidebarFooter className="p-2 border-t border-slate-100">
+          <NavUser user={clinicalData.user} />
         </SidebarFooter>
       </Sidebar>
 
-      {/* This is the second sidebar */}
-      {/* We disable collapsible and let it fill remaining space */}
-      <Sidebar collapsible="none" className="hidden flex-1 md:flex">
-        <SidebarHeader className="gap-3.5 border-b p-4">
+      {/* Secondary Triage Stream Pane */}
+      <Sidebar collapsible="none" className="hidden flex-1 md:flex overflow-hidden bg-slate-50/50">
+        <SidebarHeader className="gap-3 border-b border-slate-200 bg-white p-4">
           <div className="flex w-full items-center justify-between">
-            <div className="text-base font-medium text-foreground">
-              {activeItem?.title}
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900">{activeCategory}</h2>
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200/60">
+                {filteredPatients.length}
+              </span>
             </div>
-            <Label className="flex items-center gap-2 text-sm">
-              <span>Unreads</span>
-              <Switch className="shadow-none" />
+            <Label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+              <span>Unread</span>
+              <Switch
+                checked={showUnreadsOnly}
+                onCheckedChange={setShowUnreadsOnly}
+                className="scale-90"
+              />
             </Label>
           </div>
-          <SidebarInput placeholder="Type to search..." />
+
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 size-3.5 text-slate-400" />
+            <SidebarInput
+              placeholder="Search patient, ID, triage..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8 text-xs border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg bg-white"
+            />
+          </div>
         </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup className="px-0">
-            <SidebarGroupContent>
-              {mails.map((mail) => (
-                <a
-                  href="#"
-                  key={mail.email}
-                  className="flex flex-col items-start gap-2 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                >
-                  <div className="flex w-full items-center gap-2">
-                    <span>{mail.name}</span>{" "}
-                    <span className="ml-auto text-xs">{mail.date}</span>
-                  </div>
-                  <span className="font-medium">{mail.subject}</span>
-                  <span className="line-clamp-2 w-[260px] text-xs whitespace-break-spaces">
-                    {mail.teaser}
-                  </span>
-                </a>
-              ))}
+
+        <SidebarContent className="overflow-y-auto p-2">
+          <SidebarGroup className="p-0">
+            <SidebarGroupContent className="space-y-1.5">
+              {filteredPatients.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-500">
+                  No matching patients in {activeCategory}
+                </div>
+              ) : (
+                filteredPatients.map((patient) => {
+                  const isSelected = selectedPatientId === patient.id
+                  return (
+                    <button
+                      type="button"
+                      key={patient.id}
+                      onClick={() => onSelectPatient?.(patient.id)}
+                      className={`w-full text-left flex flex-col items-start gap-1.5 rounded-xl border p-3 text-xs leading-tight transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-50/70 shadow-xs"
+                          : "border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50 shadow-xs"
+                      }`}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                          <span>{patient.name}</span>
+                          {patient.isUnread && (
+                            <span className="size-2 rounded-full bg-emerald-500" />
+                          )}
+                        </div>
+                        <span className="text-[11px] font-medium text-slate-500">{patient.time}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] text-slate-500">{patient.id} • {patient.age}y</span>
+                        <Badge variant={patient.urgency} className="text-[10px] py-0 px-1.5 h-4">
+                          {patient.priority}
+                        </Badge>
+                      </div>
+
+                      <p className="line-clamp-2 text-[11px] text-slate-600 font-normal mt-0.5">
+                        {patient.chiefComplaint}
+                      </p>
+
+                      <div className="w-full mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span className="text-emerald-700 font-medium">{patient.room}</span>
+                        <span className="text-slate-600">{patient.status}</span>
+                      </div>
+                    </button>
+                  )
+                })
+              )}
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -260,3 +393,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   )
 }
+export { clinicalData }
+
